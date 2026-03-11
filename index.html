@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Career Hub Pro | v5.5.1 (Edit Follow-up Text)</title>
+    <title>Career Hub Pro | v5.5.4 (Interview History)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -164,7 +164,10 @@
                 <input type="text" id="c-linkedin" placeholder="LinkedIn" class="full">
                 <textarea id="c-notes" placeholder="Note CRM..." class="full"></textarea>
             </div>
-            <button class="btn btn-success" onclick="addContact()">Salva in CRM</button>
+            <div style="margin-top:15px; display: flex; gap: 10px;">
+                <button class="btn btn-success" onclick="addContact()">Salva</button>
+                <button class="btn btn-outline" onclick="resetCRMForm()">Annulla</button>
+            </div>
         </div>
         <input type="text" id="crm-search" class="search-input full" placeholder="🔍 Cerca in Rubrica..." onkeyup="renderContacts()">
         <div class="table-container"><table><thead><tr><th>Azienda</th><th>Referente</th><th>Note</th><th>Azioni</th></tr></thead><tbody id="contact-list"></tbody></table></div>
@@ -177,13 +180,13 @@
             <div class="form-grid">
                 <div class="half"><label>Azienda</label><select id="act-company" onchange="updateReferentList()"></select></div>
                 <div class="half"><label>Referente</label><select id="act-referent"></select></div>
-                <div class="half"><label>Ruolo</label><input type="text" id="act-role" placeholder="es. Project Manager"></div>
-                <div class="half"><label>Sede</label><input type="text" id="act-location" placeholder="Roma / Remoto"></div>
+                <div class="half"><label>Ruolo</label><input type="text" id="act-role"></div>
+                <div class="half"><label>Sede</label><input type="text" id="act-location"></div>
                 <div class="half"><label>Importanza</label><select id="act-rating"><option value="1">⭐</option><option value="2">⭐⭐</option><option value="3" selected>⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="5">⭐⭐⭐⭐⭐</option></select></div>
                 <div class="half"><label>Canale</label><select id="act-channel-select"></select></div>
                 <div class="half"><label>Data Attività</label><input type="date" id="act-date"></div>
-                <div class="half"><label>File CV</label><input type="text" id="act-cv" placeholder="es. CV_2024.pdf"></div>
-                <div class="half"><label>File Lettera</label><input type="text" id="act-cl" placeholder="es. CL_2024.pdf"></div>
+                <div class="half"><label>File CV</label><input type="text" id="act-cv"></div>
+                <div class="half"><label>File Lettera</label><input type="text" id="act-cl"></div>
                 <div class="full"><label>Stato</label><select id="act-status-select"></select></div>
                 <div class="full"><label>Link Annuncio</label><input type="url" id="act-link"></div>
                 <div class="full"><label>Link AI</label><input type="url" id="act-ai"></div>
@@ -196,9 +199,28 @@
                         <div class="full"><button class="btn btn-outline" style="width:100%" onclick="addFUToTemp()">+ Aggiungi Task</button></div>
                     </div>
                     <div class="table-container" style="background:white; margin-top:15px;">
-                        <table style="min-width: 100%;"><thead><tr><th>Scadenza</th><th>Descrizione</th><th>Fatto</th></tr></thead><tbody id="fu-history-list"></tbody></table>
+                        <table style="min-width: 100%;">
+                            <thead><tr><th>Scadenza</th><th>Descrizione</th><th style="text-align:center;">Fatto</th><th style="text-align:center;">Azione</th></tr></thead>
+                            <tbody id="fu-history-list"></tbody>
+                        </table>
                     </div>
                 </div>
+
+                <div class="full" style="background:#f0fdf4; padding:20px; border-radius:12px; border:1px solid #dcfce7; margin-top:10px;">
+                    <h3 style="margin-top:0">🤝 Storico Colloqui</h3>
+                    <div class="form-grid">
+                        <div class="half"><label>Data Colloquio</label><input type="date" id="new-int-date"></div>
+                        <div class="full"><label>Note/Tipo Colloquio</label><input type="text" id="new-int-note" placeholder="es. Tecnico, Conoscitivo, HR..."></div>
+                        <div class="full"><button class="btn btn-outline" style="width:100%; border-color:#22c55e; color:#15803d;" onclick="addInterviewToTemp()">+ Registra Colloquio</button></div>
+                    </div>
+                    <div class="table-container" style="background:white; margin-top:15px;">
+                        <table style="min-width: 100%;">
+                            <thead><tr><th>Data</th><th>Dettagli/Note</th><th style="text-align:center;">Azione</th></tr></thead>
+                            <tbody id="int-history-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div class="full"><label>Note Generali</label><textarea id="act-notes"></textarea></div>
             </div>
             <div style="margin-top:20px; display:flex; gap:10px;">
@@ -214,6 +236,13 @@
     </section>
 
     <section id="view-archive" class="view">
+        <div style="margin-bottom: 15px;">
+            <select id="archive-status-filter" style="padding: 10px; border: 2px solid var(--primary); border-radius: 8px; min-width: 250px; font-weight: bold;" onchange="renderArchive()">
+                <option value="all">Mostra Tutte (Archiviate e Rigettate)</option>
+                <option value="Archiviata">Mostra solo Archiviate 📦</option>
+                <option value="Rigettata">Mostra solo Rigettate ❌</option>
+            </select>
+        </div>
         <div class="table-container"><table><thead><tr><th>ID</th><th>Data</th><th>Azienda</th><th>Stato</th><th>Note</th><th>Azioni</th></tr></thead><tbody id="archive-list"></tbody></table></div>
     </section>
 
@@ -233,6 +262,7 @@
     if (!appStatuses.includes("In Corso")) appStatuses.unshift("In Corso");
 
     let tempFU = [];
+    let tempInt = []; // Temporaneo per colloqui
     let myChart = null;
 
     function save() {
@@ -252,7 +282,10 @@
         if(viewId === 'new-action') { if(!document.getElementById('act-id').value) resetActionForm(); populateActionSelectors(); }
         if(viewId === 'settings') { renderChannels(); renderStatusesConfig(); }
         if(viewId === 'registry') renderRegistry();
-        if(viewId === 'archive') renderArchive();
+        if(viewId === 'archive') {
+            document.getElementById('archive-status-filter').value = 'all';
+            renderArchive();
+        }
     }
 
     // --- DASHBOARD ---
@@ -390,12 +423,15 @@
     function addStatus() { const n = document.getElementById('new-status-name').value.trim(); if(n) { appStatuses.push(n); save(); renderStatusesConfig(); } }
     function renderStatusesConfig() { document.getElementById('statuses-config-list').innerHTML = appStatuses.map(s => `<tr><td>-</td><td>${s}</td><td>-</td></tr>`).join(''); }
 
-    // --- ACTIONS / FOLLOW-UP ---
+    // --- ACTIONS / FOLLOW-UP / INTERVIEWS ---
     function resetActionForm() {
         document.getElementById('act-id').value = '';
         document.querySelectorAll('#view-new-action input, #view-new-action textarea').forEach(i => i.value = '');
         document.getElementById('act-date').value = new Date().toISOString().split('T')[0];
-        tempFU = []; renderFUHistory();
+        tempFU = []; 
+        tempInt = [];
+        renderFUHistory();
+        renderIntHistory();
         document.getElementById('action-form-title').innerText = "🚀 Registra Candidatura";
     }
     function populateActionSelectors() {
@@ -408,33 +444,52 @@
         const refs = contacts.filter(c => c.name === comp);
         document.getElementById('act-referent').innerHTML = refs.map(r => `<option value="${r.person}" ${r.person===sel?'selected':''}>${r.person}</option>`).join('') || '<option value="-">-</option>';
     }
+    
+    // Gestione Follow-up
     function addFUToTemp() { 
         const d = document.getElementById('new-fu-date').value; const ds = document.getElementById('new-fu-desc').value; 
         if(d && ds) { tempFU.push({ id: Date.now(), date: d, desc: ds, completed: false }); document.getElementById('new-fu-date').value = ''; document.getElementById('new-fu-desc').value = ''; renderFUHistory(); } 
     }
-    
-    // MODIFICA 1: Rende il testo del follow-up modificabile
+    function deleteFUFromTemp(idx) { if(confirm("Eliminare questa attività di follow-up?")) { tempFU.splice(idx, 1); renderFUHistory(); } }
     function renderFUHistory() { 
         document.getElementById('fu-history-list').innerHTML = tempFU.map((f, i) => `
             <tr>
-                <td><input type="date" value="${f.date}" onchange="tempFU[${i}].date=this.value" style="padding:4px; font-size:0.8rem; width:100%; box-sizing:border-box;"></td>
-                <td><input type="text" value="${f.desc.replace(/"/g, '&quot;')}" onchange="tempFU[${i}].desc=this.value" style="padding:4px; font-size:0.8rem; width:100%; box-sizing:border-box;"></td>
-                <td style="text-align:center;"><input type="checkbox" ${f.completed ? 'checked' : ''} onchange="tempFU[${i}].completed=this.checked; tempFU[${i}].completedDate = this.checked ? new Date().toISOString().split('T')[0] : null;"></td>
+                <td><input type="date" value="${f.date}" onchange="tempFU[${i}].date=this.value" style="padding:4px; font-size:0.8rem; width:100%;"></td>
+                <td><input type="text" value="${f.desc.replace(/"/g, '&quot;')}" onchange="tempFU[${i}].desc=this.value" style="padding:4px; font-size:0.8rem; width:100%;"></td>
+                <td style="text-align:center;"><input type="checkbox" ${f.completed ? 'checked' : ''} onchange="tempFU[${i}].completed=this.checked;"></td>
+                <td style="text-align:center;"><button class="btn btn-outline btn-small" style="color:red; padding: 2px 6px;" onclick="deleteFUFromTemp(${i})">🗑️</button></td>
             </tr>`).join(''); 
+    }
+
+    // MODIFICA 4: Gestione Colloqui
+    function addInterviewToTemp() {
+        const d = document.getElementById('new-int-date').value;
+        const n = document.getElementById('new-int-note').value;
+        if(d && n) {
+            tempInt.push({ id: Date.now(), date: d, note: n });
+            document.getElementById('new-int-date').value = '';
+            document.getElementById('new-int-note').value = '';
+            renderIntHistory();
+        } else { alert("Inserire data e nota per il colloquio."); }
+    }
+    function deleteIntFromTemp(idx) { if(confirm("Rimuovere questo colloquio dallo storico?")) { tempInt.splice(idx, 1); renderIntHistory(); } }
+    function renderIntHistory() {
+        document.getElementById('int-history-list').innerHTML = tempInt.map((it, i) => `
+            <tr>
+                <td><input type="date" value="${it.date}" onchange="tempInt[${i}].date=this.value" style="padding:4px; font-size:0.8rem; width:100%;"></td>
+                <td><input type="text" value="${it.note.replace(/"/g, '&quot;')}" onchange="tempInt[${i}].note=this.value" style="padding:4px; font-size:0.8rem; width:100%;"></td>
+                <td style="text-align:center;"><button class="btn btn-outline btn-small" style="color:red; padding: 2px 6px;" onclick="deleteIntFromTemp(${i})">🗑️</button></td>
+            </tr>`).join('');
     }
     
     function saveAction() {
         const idInput = document.getElementById('act-id').value;
         if(!document.getElementById('act-company').value) return alert("Seleziona Azienda");
         const status = document.getElementById('act-status-select').value;
-        let targetId;
-        if(idInput) targetId = parseInt(idInput);
-        else {
-            const allIds = actions.map(a => parseInt(a.id)).filter(id => !isNaN(id));
-            targetId = allIds.length > 0 ? Math.max(...allIds) + 1 : 1;
-        }
+        let targetId = idInput ? parseInt(idInput) : (actions.length > 0 ? Math.max(...actions.map(a => a.id)) + 1 : 1);
+        
         const data = {
-            id: targetId, company: document.getElementById('act-company').value, referent: document.getElementById('act-referent').value, role: document.getElementById('act-role').value, location: document.getElementById('act-location').value, rating: document.getElementById('act-rating').value, channel: document.getElementById('act-channel-select').value, date: document.getElementById('act-date').value, cvFile: document.getElementById('act-cv').value, clFile: document.getElementById('act-cl').value, status, link: document.getElementById('act-link').value, ai: document.getElementById('act-ai').value, fuHistory: JSON.parse(JSON.stringify(tempFU)), notes: document.getElementById('act-notes').value
+            id: targetId, company: document.getElementById('act-company').value, referent: document.getElementById('act-referent').value, role: document.getElementById('act-role').value, location: document.getElementById('act-location').value, rating: document.getElementById('act-rating').value, channel: document.getElementById('act-channel-select').value, date: document.getElementById('act-date').value, cvFile: document.getElementById('act-cv').value, clFile: document.getElementById('act-cl').value, status, link: document.getElementById('act-link').value, ai: document.getElementById('act-ai').value, fuHistory: JSON.parse(JSON.stringify(tempFU)), interviewHistory: JSON.parse(JSON.stringify(tempInt)), notes: document.getElementById('act-notes').value
         };
         if(idInput) actions[actions.findIndex(a => a.id == targetId)] = data; else actions.push(data);
         save(); resetActionForm(); 
@@ -451,7 +506,9 @@
         document.getElementById('act-date').value = a.date; document.getElementById('act-cv').value = a.cvFile;
         document.getElementById('act-cl').value = a.clFile; document.getElementById('act-status-select').value = a.status;
         document.getElementById('act-link').value = a.link; document.getElementById('act-ai').value = a.ai;
-        document.getElementById('act-notes').value = a.notes; tempFU = JSON.parse(JSON.stringify(a.fuHistory || [])); renderFUHistory();
+        document.getElementById('act-notes').value = a.notes; 
+        tempFU = JSON.parse(JSON.stringify(a.fuHistory || [])); renderFUHistory();
+        tempInt = JSON.parse(JSON.stringify(a.interviewHistory || [])); renderIntHistory();
     }
 
     // --- LOGICA ARCHIVIO ---
@@ -481,10 +538,13 @@
             return `<tr><td>#${a.id}</td><td>${a.date}</td><td><strong>${a.company}</strong></td><td>${a.role}</td><td class="rating-star">${'★'.repeat(a.rating)}</td><td>${a.status}</td><td>${nextFU ? nextFU.date : '-'}</td><td><button class="btn btn-outline btn-small" onclick="editAction(${a.id})" title="Modifica">✏️</button> <button class="btn btn-outline btn-small" onclick="archiveAction(${a.id})" title="Archivia">📦</button> <button class="btn btn-outline btn-small" style="color:red" onclick="deleteAction(${a.id})">🗑️</button></td></tr>`;
         }).join('');
     }
+    
     function renderArchive() {
-        const f = actions.filter(a => a.status === 'Archiviata' || a.status === 'Rigettata');
+        const filterVal = document.getElementById('archive-status-filter').value;
+        const f = actions.filter(a => filterVal === 'all' ? (a.status === 'Archiviata' || a.status === 'Rigettata') : a.status === filterVal);
         document.getElementById('archive-list').innerHTML = f.map(a => `<tr><td>#${a.id}</td><td>${a.date}</td><td>${a.company}</td><td>${a.status}</td><td style="font-size:0.75rem" title="${a.notes}">${a.notes || ''}</td><td><button class="btn btn-outline btn-small" onclick="restoreAction(${a.id})" title="Ripristina">🔄</button> <button class="btn btn-outline btn-small" onclick="editAction(${a.id})">✏️</button> <button class="btn btn-outline btn-small" style="color:red" onclick="deleteAction(${a.id})">🗑️</button></td></tr>`).join('');
     }
+    
     function markFUDone(actId, fuId) { const a = actions.find(a => a.id === actId); a.fuHistory.find(f => f.id === fuId).completed = true; save(); renderDashboard(); }
 
     window.onload = () => showView('dashboard');
