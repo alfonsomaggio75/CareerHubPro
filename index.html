@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Career Hub Pro | v5.5.4 (Interview History)</title>
+    <title>Career Hub Pro | v5.5.9 (Link Buttons)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -27,7 +27,10 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: var(--card); padding: 1.2rem; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .stat-card { background: var(--card); padding: 1.2rem; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; }
+        .stat-card.clickable { cursor: pointer; }
+        .stat-card.clickable:hover { transform: translateY(-3px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-color: var(--primary); }
+        
         .stat-card span { font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
         .stat-card h2 { margin: 8px 0 0; color: var(--primary); font-size: 1.5rem; }
 
@@ -38,6 +41,9 @@
         label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; color: #475569; }
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; }
         
+        /* Flex containers per i link */
+        .link-container { display: flex; gap: 8px; align-items: center; }
+
         .btn { padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; font-size: 0.85rem; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
@@ -49,6 +55,8 @@
         table { width: 100%; border-collapse: collapse; min-width: 1000px; }
         th { background: #f8fafc; padding: 12px; text-align: left; font-size: 0.7rem; color: #64748b; text-transform: uppercase; border-bottom: 1px solid var(--border); }
         td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+
+        .row-interview { background-color: #f0fdf4 !important; border-left: 4px solid #22c55e !important; }
 
         .urgent-item { padding: 15px; background: #fff; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid var(--primary); }
         .status-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-bottom: 5px; }
@@ -77,12 +85,12 @@
     
     <section id="view-dashboard" class="view active">
         <div class="stats-grid">
-            <div class="stat-card"><span>In Corso</span><h2 id="stat-in-progress">0</h2></div>
-            <div class="stat-card"><span>Colloqui</span><h2 id="stat-interviews">0</h2></div>
-            <div class="stat-card" style="border-left: 4px solid var(--danger);"><span>Rigettate</span><h2 id="stat-rejected">0</h2></div>
-            <div class="stat-card"><span>Archiviate</span><h2 id="stat-archived">0</h2></div>
+            <div class="stat-card clickable" onclick="filterByStatus('In Corso')"><span>In Corso</span><h2 id="stat-in-progress">0</h2></div>
+            <div class="stat-card clickable" onclick="filterByStatus('Colloquio')"><span>Colloqui (In Corso)</span><h2 id="stat-interviews">0</h2></div>
+            <div class="stat-card" style="border-left: 4px solid var(--accent);"><span>Colloqui Tot. Fatti</span><h2 id="stat-interviews-total">0</h2></div>
+            <div class="stat-card clickable" onclick="filterByStatus('Rigettata')" style="border-left: 4px solid var(--danger);"><span>Rigettate</span><h2 id="stat-rejected">0</h2></div>
+            <div class="stat-card clickable" onclick="filterByStatus('Archiviata')"><span>Archiviate</span><h2 id="stat-archived">0</h2></div>
             <div class="stat-card"><span>FU Scaduti</span><h2 id="stat-tasks">0</h2></div>
-            <div class="stat-card"><span>Aziende CRM</span><h2 id="stat-contacts">0</h2></div>
         </div>
 
         <div class="form-card" style="margin-bottom: 20px;">
@@ -138,16 +146,16 @@
                 <input type="text" id="new-channel-name" placeholder="Nome canale">
                 <button class="btn btn-success" onclick="addChannel()">Aggiungi</button>
             </div>
-            <div class="table-container"><table><thead><tr><th>Ordine</th><th>Nome</th><th>Azione</th></tr></thead><tbody id="channels-list"></tbody></table></div>
+            <div class="table-container"><table><thead><tr><th>#</th><th>Nome Canale</th><th>Azioni</th></tr></thead><tbody id="channels-list"></tbody></table></div>
         </div>
 
         <div class="form-card" style="margin-top: 30px;">
             <h3>📊 Stati</h3>
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                 <input type="text" id="new-status-name" placeholder="Nome stato">
-                <button class="btn btn-success" onclick="addStatus()">Aggiungi</button>
+                <button class="btn btn-success" onclick="addStatus()">Aggiungi Stato</button>
             </div>
-            <div class="table-container"><table><thead><tr><th>Ordine</th><th>Nome</th><th>Azione</th></tr></thead><tbody id="statuses-config-list"></tbody></table></div>
+            <div class="table-container"><table><thead><tr><th>Ordine</th><th>Nome Stato</th><th>Azioni</th></tr></thead><tbody id="statuses-config-list"></tbody></table></div>
         </div>
     </section>
 
@@ -158,10 +166,10 @@
             <div class="form-grid">
                 <input type="text" id="c-name" placeholder="Nome Azienda *">
                 <input type="text" id="c-person" placeholder="Nome Referente">
-                <input type="text" id="c-role-contact" placeholder="Ruolo">
+                <input type="text" id="c-role-contact" placeholder="Ruolo Referente">
                 <input type="email" id="c-email" placeholder="Email">
-                <input type="text" id="c-phone" placeholder="Tel">
-                <input type="text" id="c-linkedin" placeholder="LinkedIn" class="full">
+                <input type="text" id="c-phone" placeholder="Telefono">
+                <input type="text" id="c-linkedin" placeholder="LinkedIn URL" class="full">
                 <textarea id="c-notes" placeholder="Note CRM..." class="full"></textarea>
             </div>
             <div style="margin-top:15px; display: flex; gap: 10px;">
@@ -187,9 +195,22 @@
                 <div class="half"><label>Data Attività</label><input type="date" id="act-date"></div>
                 <div class="half"><label>File CV</label><input type="text" id="act-cv"></div>
                 <div class="half"><label>File Lettera</label><input type="text" id="act-cl"></div>
-                <div class="full"><label>Stato</label><select id="act-status-select"></select></div>
-                <div class="full"><label>Link Annuncio</label><input type="url" id="act-link"></div>
-                <div class="full"><label>Link AI</label><input type="url" id="act-ai"></div>
+                <div class="full"><label>Stato Candidatura</label><select id="act-status-select"></select></div>
+                
+                <div class="full">
+                    <label>Link Annuncio</label>
+                    <div class="link-container">
+                        <input type="url" id="act-link" placeholder="https://...">
+                        <button class="btn btn-outline btn-small" onclick="openOuterLink('act-link')">🌐 Apri</button>
+                    </div>
+                </div>
+                <div class="full">
+                    <label>Link AI</label>
+                    <div class="link-container">
+                        <input type="url" id="act-ai" placeholder="https://chat.openai.com/...">
+                        <button class="btn btn-outline btn-small" onclick="openOuterLink('act-ai')">🤖 Apri</button>
+                    </div>
+                </div>
                 
                 <div class="full" style="background:#fefce8; padding:20px; border-radius:12px; border:1px solid #fef08a;">
                     <h3 style="margin-top:0">📅 Follow-up Avanzato</h3>
@@ -210,7 +231,7 @@
                     <h3 style="margin-top:0">🤝 Storico Colloqui</h3>
                     <div class="form-grid">
                         <div class="half"><label>Data Colloquio</label><input type="date" id="new-int-date"></div>
-                        <div class="full"><label>Note/Tipo Colloquio</label><input type="text" id="new-int-note" placeholder="es. Tecnico, Conoscitivo, HR..."></div>
+                        <div class="full"><label>Note/Tipo Colloquio</label><input type="text" id="new-int-note" placeholder="es. Tecnico, Con HR..."></div>
                         <div class="full"><button class="btn btn-outline" style="width:100%; border-color:#22c55e; color:#15803d;" onclick="addInterviewToTemp()">+ Registra Colloquio</button></div>
                     </div>
                     <div class="table-container" style="background:white; margin-top:15px;">
@@ -231,17 +252,21 @@
     </section>
 
     <section id="view-registry" class="view">
-        <input type="text" id="registry-search" class="search-input full" placeholder="🔍 Ricerca globale..." onkeyup="renderRegistry()">
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom:15px;">
+             <input type="text" id="registry-search" class="search-input" style="flex-grow:1" placeholder="🔍 Ricerca globale..." onkeyup="renderRegistry()">
+             <button class="btn btn-outline" onclick="clearFilters('registry')">Resetta Filtro</button>
+        </div>
         <div class="table-container"><table><thead><tr><th>ID</th><th>Data</th><th>Azienda</th><th>Ruolo</th><th>Imp.</th><th>Stato</th><th>FU</th><th>Azioni</th></tr></thead><tbody id="action-list"></tbody></table></div>
     </section>
 
     <section id="view-archive" class="view">
-        <div style="margin-bottom: 15px;">
+        <div style="margin-bottom: 15px; display:flex; gap:10px;">
             <select id="archive-status-filter" style="padding: 10px; border: 2px solid var(--primary); border-radius: 8px; min-width: 250px; font-weight: bold;" onchange="renderArchive()">
                 <option value="all">Mostra Tutte (Archiviate e Rigettate)</option>
                 <option value="Archiviata">Mostra solo Archiviate 📦</option>
                 <option value="Rigettata">Mostra solo Rigettate ❌</option>
             </select>
+            <button class="btn btn-outline" onclick="clearFilters('archive')">Resetta Filtro</button>
         </div>
         <div class="table-container"><table><thead><tr><th>ID</th><th>Data</th><th>Azienda</th><th>Stato</th><th>Note</th><th>Azioni</th></tr></thead><tbody id="archive-list"></tbody></table></div>
     </section>
@@ -262,7 +287,7 @@
     if (!appStatuses.includes("In Corso")) appStatuses.unshift("In Corso");
 
     let tempFU = [];
-    let tempInt = []; // Temporaneo per colloqui
+    let tempInt = [];
     let myChart = null;
 
     function save() {
@@ -282,9 +307,16 @@
         if(viewId === 'new-action') { if(!document.getElementById('act-id').value) resetActionForm(); populateActionSelectors(); }
         if(viewId === 'settings') { renderChannels(); renderStatusesConfig(); }
         if(viewId === 'registry') renderRegistry();
-        if(viewId === 'archive') {
-            document.getElementById('archive-status-filter').value = 'all';
-            renderArchive();
+        if(viewId === 'archive') { renderArchive(); }
+    }
+
+    // --- LOGICA PULSANTI LINK ---
+    function openOuterLink(inputId) {
+        const url = document.getElementById(inputId).value.trim();
+        if(url) {
+            window.open(url, '_blank');
+        } else {
+            alert("Inserire prima un indirizzo URL valido nel campo.");
         }
     }
 
@@ -295,117 +327,99 @@
         document.getElementById('stat-interviews').innerText = actions.filter(a => a.status === 'Colloquio').length;
         document.getElementById('stat-rejected').innerText = actions.filter(a => a.status === 'Rigettata').length;
         document.getElementById('stat-archived').innerText = actions.filter(a => a.status === 'Archiviata').length;
-        document.getElementById('stat-contacts').innerText = contacts.length;
+
+        let totalInterviewsDone = 0;
+        actions.forEach(a => { if(a.interviewHistory) totalInterviewsDone += a.interviewHistory.length; });
+        document.getElementById('stat-interviews-total').innerText = totalInterviewsDone;
 
         let urgentTasks = [];
         actions.forEach(a => {
             if(a.status !== 'Archiviata' && a.status !== 'Rigettata') {
-                (a.fuHistory || []).forEach(f => { 
-                    if(!f.completed && f.date <= todayStr) {
-                        urgentTasks.push({ actId: a.id, company: a.company, role: a.role, fu: f }); 
-                    }
-                });
+                (a.fuHistory || []).forEach(f => { if(!f.completed && f.date <= todayStr) urgentTasks.push({ actId: a.id, company: a.company, role: a.role, fu: f }); });
             }
         });
         urgentTasks.sort((a, b) => new Date(a.fu.date) - new Date(b.fu.date));
         document.getElementById('stat-tasks').innerText = urgentTasks.length;
-        document.getElementById('urgent-list').innerHTML = urgentTasks.map(u => {
-            const isExpired = u.fu.date < todayStr;
-            return `<div class="urgent-item ${isExpired ? 'tag-expired' : ''}">
-                <span class="status-tag ${isExpired ? 'tag-expired' : 'tag-today'}">${isExpired ? '⚠️ SCADUTO' : '🔔 OGGI'}</span>
-                <div><strong>${u.company}</strong></div>
-                <div style="font-size:0.8rem; color:#64748b; margin-bottom:8px;">${u.role}<br><em>Azione: ${u.fu.desc} (${u.fu.date})</em></div>
-                <div style="display:flex; gap:5px;">
-                    <button class="btn btn-primary btn-small" onclick="markFUDone(${u.actId}, ${u.fu.id})">Fatto</button>
-                    <button class="btn btn-outline btn-small" onclick="editAction(${u.actId})">Apri</button>
-                </div>
-            </div>`;
-        }).join('') || '<p style="grid-column: 1/-1; color:#64748b; text-align:center; padding: 20px;">Tutte le attività sono aggiornate!</p>';
+        document.getElementById('urgent-list').innerHTML = urgentTasks.map(u => `<div class="urgent-item ${u.fu.date < todayStr ? 'tag-expired' : ''}"><span class="status-tag ${u.fu.date < todayStr ? 'tag-expired' : 'tag-today'}">${u.fu.date < todayStr ? '⚠️ SCADUTO' : '🔔 OGGI'}</span><div><strong>${u.company}</strong> - ${u.role}</div><div style="font-size:0.8rem; color:#64748b; margin-top:4px;">${u.fu.desc} (${u.fu.date})</div><div style="display:flex; gap:5px; margin-top:8px;"><button class="btn btn-primary btn-small" onclick="markFUDone(${u.actId}, ${u.fu.id})">Fatto</button><button class="btn btn-outline btn-small" onclick="editAction(${u.actId})">Apri</button></div></div>`).join('') || '<p style="grid-column: 1/-1; color:#64748b; text-align:center; padding: 20px;">Tutto in ordine!</p>';
+        
         renderChart(actions);
+    }
+
+    function filterByStatus(status) {
+        if(status === 'Archiviata' || status === 'Rigettata') {
+            document.getElementById('archive-status-filter').value = status;
+            showView('archive');
+        } else {
+            document.getElementById('registry-search').value = status;
+            showView('registry');
+        }
+    }
+
+    function clearFilters(type) {
+        if(type === 'registry') { document.getElementById('registry-search').value = ''; renderRegistry(); }
+        else if(type === 'archive') { document.getElementById('archive-status-filter').value = 'all'; renderArchive(); }
     }
 
     // --- CHART ---
     function renderChart(data) {
         const ctx = document.getElementById('impactChart').getContext('2d');
-        const countsTot = {}; 
-        const countsActive = {}; 
-        const countsInterview = {};
-        
+        const cTot = {}, cAct = {}, cInt = {};
         data.forEach(a => {
-            countsTot[a.date] = (countsTot[a.date] || 0) + 1;
-            if(a.status === 'In Corso') countsActive[a.date] = (countsActive[a.date] || 0) + 1;
-            if(a.status === 'Colloquio') countsInterview[a.date] = (countsInterview[a.date] || 0) + 1;
+            cTot[a.date] = (cTot[a.date] || 0) + 1;
+            if(a.status === 'In Corso') cAct[a.date] = (cAct[a.date] || 0) + 1;
+            if(a.status === 'Colloquio') cInt[a.date] = (cInt[a.date] || 0) + 1;
         });
-
-        const labels = Object.keys(countsTot).sort();
-        
+        const labels = Object.keys(cTot).sort();
         if(myChart) myChart.destroy();
         myChart = new Chart(ctx, {
             type: 'line',
-            data: {
-                labels,
-                datasets: [
-                    { label: 'Totale Candidature', data: labels.map(l => countsTot[l] || 0), borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.05)', borderWidth: 2, tension: 0.3, fill: true },
-                    { label: 'Attive (In Corso)', data: labels.map(l => countsActive[l] || 0), borderColor: '#10b981', borderWidth: 2, tension: 0.3, fill: false },
-                    { label: 'In Colloquio', data: labels.map(l => countsInterview[l] || 0), borderColor: '#f59e0b', borderWidth: 2, tension: 0.3, fill: false }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: { mode: 'index', intersect: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            data: { labels, datasets: [
+                { label: 'Totali', data: labels.map(l => cTot[l] || 0), borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.05)', borderWidth: 2, tension: 0.3, fill: true },
+                { label: 'Attive', data: labels.map(l => cAct[l] || 0), borderColor: '#10b981', borderWidth: 2, tension: 0.3, fill: false },
+                { label: 'Colloqui', data: labels.map(l => cInt[l] || 0), borderColor: '#f59e0b', borderWidth: 2, tension: 0.3, fill: false }
+            ]},
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
         });
     }
 
-    // --- IO / EXPORT / IMPORT ---
+    // --- IO / IMPORT / EXPORT ---
     function toggleExportDates(val) { document.querySelectorAll('.export-date-field').forEach(el => el.style.display = (val === 'range' ? 'block' : 'none')); }
-    function downloadFile(content, filename, contentType) {
-        const blob = new Blob([content], { type: contentType });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
-        URL.revokeObjectURL(url);
-    }
+    function downloadFile(content, filename, contentType) { const b = new Blob([content], { type: contentType }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = filename; a.click(); URL.revokeObjectURL(u); }
     function exportData(format) {
         const type = document.getElementById('export-type').value;
         const start = document.getElementById('export-start').value;
         const end = document.getElementById('export-end').value;
-        let dataToExport = [...actions];
-        if (type === 'range') { if (!start || !end) return alert("Seleziona il periodo."); dataToExport = actions.filter(a => a.date >= start && a.date <= end); }
-        if (dataToExport.length === 0) return alert("Nessun dato da esportare.");
-        const timestamp = new Date().toISOString().split('T')[0];
-        let filename = `career_hub_export_${timestamp}`;
-        if (format === 'json') downloadFile(JSON.stringify({ actions: dataToExport, contacts, channels, appStatuses }, null, 2), `${filename}.json`, 'application/json');
+        let dE = [...actions];
+        if (type === 'range') { if (!start || !end) return alert("Seleziona periodo."); dE = actions.filter(a => a.date >= start && a.date <= end); }
+        if (dE.length === 0) return alert("Nessun dato.");
+        const ts = new Date().toISOString().split('T')[0];
+        let fn = `career_hub_backup_${ts}`;
+        if (format === 'json') downloadFile(JSON.stringify({ actions: dE, contacts, channels, appStatuses }, null, 2), `${fn}.json`, 'application/json');
         else {
-            const headers = ["ID", "Data", "Azienda", "Referente", "Ruolo", "Sede", "Valutazione", "Canale", "Stato", "CV_File", "CL_File", "Link_Annuncio", "Link_AI", "Note"];
-            const rows = dataToExport.map(a => [a.id, a.date, a.company, a.referent, a.role, a.location, a.rating, a.channel, a.status, a.cvFile, a.clFile, a.link, a.ai, (a.notes || "").replace(/\n/g, " ")]);
+            const h = ["ID", "Data", "Azienda", "Referente", "Ruolo", "Sede", "Canale", "Stato"];
+            const r = dE.map(a => [a.id, a.date, a.company, a.referent, a.role, a.location, a.channel, a.status]);
             if (format === 'xlsx') {
-                let xml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Export</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml></head><body><table><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>${rows.map(r => `<tr>${r.map(f => `<td>${f}</td>`).join('')}</tr>`).join('')}</table></body></html>`;
-                downloadFile(xml, `${filename}.xls`, 'application/vnd.ms-excel');
+                let xml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Export</x:Name></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml></head><body><table><tr>${h.map(i => `<th>${i}</th>`).join('')}</tr>${r.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}</table></body></html>`;
+                downloadFile(xml, `${fn}.xls`, 'application/vnd.ms-excel');
             } else {
-                let content = headers.join(",") + "\n" + rows.map(r => r.map(f => `"${f || ''}"`).join(",")).join("\n");
-                downloadFile(content, `${filename}.csv`, 'text/csv');
+                let csv = h.join(",") + "\n" + r.map(row => row.map(cell => `"${cell || ''}"`).join(",")).join("\n");
+                downloadFile(csv, `${filename}.csv`, 'text/csv');
             }
         }
     }
     function importDatabase() {
-        const f = document.getElementById('import-file');
-        if (!f.files.length) return alert("Scegli un file.");
+        const fi = document.getElementById('import-file');
+        if (!fi.files.length) return alert("Scegli file.");
         const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const d = JSON.parse(e.target.result);
-                if (confirm("Sovrascrivere tutto?")) { 
-                    actions = d.actions || []; contacts = d.contacts || []; 
-                    channels = d.channels || defaultChannels; appStatuses = d.appStatuses || defaultStatuses;
-                    save(); location.reload(); 
-                }
-            } catch (err) { alert("File non valido."); }
-        };
-        reader.readAsText(f.files[0]);
+        reader.onload = (e) => { try { const d = JSON.parse(e.target.result); if (confirm("Sovrascrivere tutto?")) { actions = d.actions || []; contacts = d.contacts || []; channels = d.channels || defaultChannels; appStatuses = d.appStatuses || defaultStatuses; save(); location.reload(); } } catch (err) { alert("File non valido."); } };
+        reader.readAsText(fi.files[0]);
     }
 
-    // --- CRM / CANALI / STATI ---
+    // --- CRM ---
     function addContact() {
         const id = document.getElementById('c-id').value;
         const name = document.getElementById('c-name').value;
-        if(!name) return alert("Nome azienda obbligatorio");
+        if(!name) return alert("Azienda obbligatoria");
         const data = { id: id ? parseInt(id) : Date.now(), name, person: document.getElementById('c-person').value, role: document.getElementById('c-role-contact').value, email: document.getElementById('c-email').value, phone: document.getElementById('c-phone').value, linkedin: document.getElementById('c-linkedin').value, notes: document.getElementById('c-notes').value };
         if(id) contacts[contacts.findIndex(c => c.id == id)] = data; else contacts.push(data);
         save(); resetCRMForm(); renderContacts();
@@ -418,20 +432,17 @@
     }
     function editContact(id) { const c = contacts.find(c => c.id == id); document.getElementById('c-id').value = c.id; document.getElementById('c-name').value = c.name; document.getElementById('c-person').value = c.person; document.getElementById('c-role-contact').value = c.role; document.getElementById('c-email').value = c.email; document.getElementById('c-phone').value = c.phone; document.getElementById('c-linkedin').value = c.linkedin; document.getElementById('c-notes').value = c.notes; showView('address-book'); }
     function addChannel() { const n = document.getElementById('new-channel-name').value.trim(); if(n) { channels.push(n); save(); renderChannels(); } }
-    function renderChannels() { document.getElementById('channels-list').innerHTML = channels.map((c, i) => `<tr><td><button class="btn btn-outline btn-small" onclick="moveChannel(${i}, -1)">▲</button><button class="btn btn-outline btn-small" onclick="moveChannel(${i}, 1)">▼</button></td><td>${c}</td><td><button onclick="deleteChannel('${c}')">🗑️</button></td></tr>`).join(''); }
+    function renderChannels() { document.getElementById('channels-list').innerHTML = channels.map((c, i) => `<tr><td>#${i+1}</td><td>${c}</td><td><button onclick="deleteChannel('${c}')">🗑️</button></td></tr>`).join(''); }
     function deleteChannel(n) { channels = channels.filter(c => c !== n); save(); renderChannels(); }
     function addStatus() { const n = document.getElementById('new-status-name').value.trim(); if(n) { appStatuses.push(n); save(); renderStatusesConfig(); } }
     function renderStatusesConfig() { document.getElementById('statuses-config-list').innerHTML = appStatuses.map(s => `<tr><td>-</td><td>${s}</td><td>-</td></tr>`).join(''); }
 
-    // --- ACTIONS / FOLLOW-UP / INTERVIEWS ---
+    // --- ACTIONS / FORM ---
     function resetActionForm() {
         document.getElementById('act-id').value = '';
         document.querySelectorAll('#view-new-action input, #view-new-action textarea').forEach(i => i.value = '');
         document.getElementById('act-date').value = new Date().toISOString().split('T')[0];
-        tempFU = []; 
-        tempInt = [];
-        renderFUHistory();
-        renderIntHistory();
+        tempFU = []; tempInt = []; renderFUHistory(); renderIntHistory();
         document.getElementById('action-form-title').innerText = "🚀 Registra Candidatura";
     }
     function populateActionSelectors() {
@@ -445,104 +456,84 @@
         document.getElementById('act-referent').innerHTML = refs.map(r => `<option value="${r.person}" ${r.person===sel?'selected':''}>${r.person}</option>`).join('') || '<option value="-">-</option>';
     }
     
-    // Gestione Follow-up
-    function addFUToTemp() { 
-        const d = document.getElementById('new-fu-date').value; const ds = document.getElementById('new-fu-desc').value; 
-        if(d && ds) { tempFU.push({ id: Date.now(), date: d, desc: ds, completed: false }); document.getElementById('new-fu-date').value = ''; document.getElementById('new-fu-desc').value = ''; renderFUHistory(); } 
-    }
-    function deleteFUFromTemp(idx) { if(confirm("Eliminare questa attività di follow-up?")) { tempFU.splice(idx, 1); renderFUHistory(); } }
-    function renderFUHistory() { 
-        document.getElementById('fu-history-list').innerHTML = tempFU.map((f, i) => `
-            <tr>
-                <td><input type="date" value="${f.date}" onchange="tempFU[${i}].date=this.value" style="padding:4px; font-size:0.8rem; width:100%;"></td>
-                <td><input type="text" value="${f.desc.replace(/"/g, '&quot;')}" onchange="tempFU[${i}].desc=this.value" style="padding:4px; font-size:0.8rem; width:100%;"></td>
-                <td style="text-align:center;"><input type="checkbox" ${f.completed ? 'checked' : ''} onchange="tempFU[${i}].completed=this.checked;"></td>
-                <td style="text-align:center;"><button class="btn btn-outline btn-small" style="color:red; padding: 2px 6px;" onclick="deleteFUFromTemp(${i})">🗑️</button></td>
-            </tr>`).join(''); 
-    }
+    function addFUToTemp() { const d = document.getElementById('new-fu-date').value; const ds = document.getElementById('new-fu-desc').value; if(d && ds) { tempFU.push({ id: Date.now(), date: d, desc: ds, completed: false }); document.getElementById('new-fu-date').value = ''; document.getElementById('new-fu-desc').value = ''; renderFUHistory(); } }
+    function deleteFUFromTemp(idx) { if(confirm("Eliminare task?")) { tempFU.splice(idx, 1); renderFUHistory(); } }
+    function renderFUHistory() { document.getElementById('fu-history-list').innerHTML = tempFU.map((f, i) => `<tr><td><input type="date" value="${f.date}" onchange="tempFU[${i}].date=this.value" style="width:100%;"></td><td><input type="text" value="${f.desc.replace(/"/g, '&quot;')}" onchange="tempFU[${i}].desc=this.value" style="width:100%;"></td><td style="text-align:center;"><input type="checkbox" ${f.completed ? 'checked' : ''} onchange="tempFU[${i}].completed=this.checked;"></td><td style="text-align:center;"><button onclick="deleteFUFromTemp(${i})">🗑️</button></td></tr>`).join(''); }
 
-    // MODIFICA 4: Gestione Colloqui
-    function addInterviewToTemp() {
-        const d = document.getElementById('new-int-date').value;
-        const n = document.getElementById('new-int-note').value;
-        if(d && n) {
-            tempInt.push({ id: Date.now(), date: d, note: n });
-            document.getElementById('new-int-date').value = '';
-            document.getElementById('new-int-note').value = '';
-            renderIntHistory();
-        } else { alert("Inserire data e nota per il colloquio."); }
-    }
-    function deleteIntFromTemp(idx) { if(confirm("Rimuovere questo colloquio dallo storico?")) { tempInt.splice(idx, 1); renderIntHistory(); } }
-    function renderIntHistory() {
-        document.getElementById('int-history-list').innerHTML = tempInt.map((it, i) => `
-            <tr>
-                <td><input type="date" value="${it.date}" onchange="tempInt[${i}].date=this.value" style="padding:4px; font-size:0.8rem; width:100%;"></td>
-                <td><input type="text" value="${it.note.replace(/"/g, '&quot;')}" onchange="tempInt[${i}].note=this.value" style="padding:4px; font-size:0.8rem; width:100%;"></td>
-                <td style="text-align:center;"><button class="btn btn-outline btn-small" style="color:red; padding: 2px 6px;" onclick="deleteIntFromTemp(${i})">🗑️</button></td>
-            </tr>`).join('');
-    }
+    function addInterviewToTemp() { const d = document.getElementById('new-int-date').value; const n = document.getElementById('new-int-note').value; if(d && n) { tempInt.push({ id: Date.now(), date: d, note: n }); document.getElementById('new-int-date').value = ''; document.getElementById('new-int-note').value = ''; renderIntHistory(); } }
+    function deleteIntFromTemp(idx) { if(confirm("Rimuovere colloquio?")) { tempInt.splice(idx, 1); renderIntHistory(); } }
+    function renderIntHistory() { document.getElementById('int-history-list').innerHTML = tempInt.map((it, i) => `<tr><td><input type="date" value="${it.date}" onchange="tempInt[${i}].date=this.value" style="width:100%;"></td><td><input type="text" value="${it.note.replace(/"/g, '&quot;')}" onchange="tempInt[${i}].note=this.value" style="width:100%;"></td><td style="text-align:center;"><button onclick="deleteIntFromTemp(${i})">🗑️</button></td></tr>`).join(''); }
     
     function saveAction() {
-        const idInput = document.getElementById('act-id').value;
+        const idIn = document.getElementById('act-id').value;
         if(!document.getElementById('act-company').value) return alert("Seleziona Azienda");
         const status = document.getElementById('act-status-select').value;
-        let targetId = idInput ? parseInt(idInput) : (actions.length > 0 ? Math.max(...actions.map(a => a.id)) + 1 : 1);
-        
-        const data = {
-            id: targetId, company: document.getElementById('act-company').value, referent: document.getElementById('act-referent').value, role: document.getElementById('act-role').value, location: document.getElementById('act-location').value, rating: document.getElementById('act-rating').value, channel: document.getElementById('act-channel-select').value, date: document.getElementById('act-date').value, cvFile: document.getElementById('act-cv').value, clFile: document.getElementById('act-cl').value, status, link: document.getElementById('act-link').value, ai: document.getElementById('act-ai').value, fuHistory: JSON.parse(JSON.stringify(tempFU)), interviewHistory: JSON.parse(JSON.stringify(tempInt)), notes: document.getElementById('act-notes').value
-        };
-        if(idInput) actions[actions.findIndex(a => a.id == targetId)] = data; else actions.push(data);
-        save(); resetActionForm(); 
-        (status === 'Archiviata' || status === 'Rigettata') ? showView('archive') : showView('registry');
+        let tId = idIn ? parseInt(idIn) : (actions.length > 0 ? Math.max(...actions.map(a => parseInt(a.id)).filter(id => !isNaN(id))) + 1 : 1);
+        const data = { id: tId, company: document.getElementById('act-company').value, referent: document.getElementById('act-referent').value, role: document.getElementById('act-role').value, location: document.getElementById('act-location').value, rating: document.getElementById('act-rating').value, channel: document.getElementById('act-channel-select').value, date: document.getElementById('act-date').value, cvFile: document.getElementById('act-cv').value, clFile: document.getElementById('act-cl').value, status, link: document.getElementById('act-link').value, ai: document.getElementById('act-ai').value, fuHistory: JSON.parse(JSON.stringify(tempFU)), interviewHistory: JSON.parse(JSON.stringify(tempInt)), notes: document.getElementById('act-notes').value };
+        if(idIn) actions[actions.findIndex(a => a.id == tId)] = data; else actions.push(data);
+        save(); resetActionForm(); (status === 'Archiviata' || status === 'Rigettata') ? showView('archive') : showView('registry');
     }
 
     function editAction(id) {
-        const a = actions.find(a => a.id == id);
-        document.getElementById('act-id').value = a.id;
-        showView('new-action');
+        const a = actions.find(a => a.id == id); document.getElementById('act-id').value = a.id; showView('new-action');
         document.getElementById('act-company').value = a.company; updateReferentList(a.referent);
         document.getElementById('act-role').value = a.role; document.getElementById('act-location').value = a.location;
         document.getElementById('act-rating').value = a.rating; document.getElementById('act-channel-select').value = a.channel;
         document.getElementById('act-date').value = a.date; document.getElementById('act-cv').value = a.cvFile;
         document.getElementById('act-cl').value = a.clFile; document.getElementById('act-status-select').value = a.status;
         document.getElementById('act-link').value = a.link; document.getElementById('act-ai').value = a.ai;
-        document.getElementById('act-notes').value = a.notes; 
-        tempFU = JSON.parse(JSON.stringify(a.fuHistory || [])); renderFUHistory();
+        document.getElementById('act-notes').value = a.notes; tempFU = JSON.parse(JSON.stringify(a.fuHistory || [])); renderFUHistory();
         tempInt = JSON.parse(JSON.stringify(a.interviewHistory || [])); renderIntHistory();
     }
 
-    // --- LOGICA ARCHIVIO ---
-    function archiveAction(id) {
-        const a = actions.find(a => a.id === id);
-        const reason = prompt("Inserisci una nota per l'archiviazione (Obbligatoria):");
-        if (reason === null) return;
-        if (!reason.trim()) { alert("Nota obbligatoria!"); return archiveAction(id); }
-        a.status = 'Archiviata';
-        a.notes = (a.notes ? a.notes + "\n" : "") + "[" + new Date().toLocaleDateString() + "] Archiviazione: " + reason;
-        save(); renderRegistry(); renderArchive(); renderDashboard();
-    }
-    function restoreAction(id) {
-        if(confirm("Ripristinare nel Registro Totale?")) {
-            const a = actions.find(a => a.id === id); a.status = 'In Corso';
-            save(); renderRegistry(); renderArchive(); renderDashboard();
-            alert("Ripristinata!");
-        }
-    }
-    function deleteAction(id) { if(confirm("Eliminare DEFINITIVAMENTE?")) { actions = actions.filter(a => a.id !== id); save(); renderRegistry(); renderArchive(); renderDashboard(); } }
-
+    // --- REGISTRO / ARCHIVIO ---
+    function archiveAction(id) { const a = actions.find(a => a.id === id); const r = prompt("Nota archiviazione:"); if(!r) return; a.status = 'Archiviata'; a.notes = (a.notes ? a.notes + "\n" : "") + "[" + new Date().toLocaleDateString() + "] Archiviazione: " + r; save(); renderRegistry(); renderArchive(); renderDashboard(); }
+    function restoreAction(id) { const a = actions.find(a => a.id === id); a.status = 'In Corso'; save(); renderRegistry(); renderArchive(); renderDashboard(); }
+    function deleteAction(id) { if(confirm("Eliminare?")) { actions = actions.filter(a => a.id !== id); save(); renderRegistry(); renderArchive(); renderDashboard(); } }
+    
     function renderRegistry() {
         const s = document.getElementById('registry-search').value.toLowerCase();
-        const f = actions.filter(a => a.status !== 'Archiviata' && a.status !== 'Rigettata').filter(a => a.company.toLowerCase().includes(s));
+        const f = actions.filter(a => a.status !== 'Archiviata' && a.status !== 'Rigettata').filter(a => 
+            a.company.toLowerCase().includes(s) || a.role.toLowerCase().includes(s) || a.status.toLowerCase().includes(s)
+        );
         document.getElementById('action-list').innerHTML = f.map(a => {
             const nextFU = (a.fuHistory || []).filter(fu => !fu.completed).sort((x,y) => new Date(x.date) - new Date(y.date))[0];
-            return `<tr><td>#${a.id}</td><td>${a.date}</td><td><strong>${a.company}</strong></td><td>${a.role}</td><td class="rating-star">${'★'.repeat(a.rating)}</td><td>${a.status}</td><td>${nextFU ? nextFU.date : '-'}</td><td><button class="btn btn-outline btn-small" onclick="editAction(${a.id})" title="Modifica">✏️</button> <button class="btn btn-outline btn-small" onclick="archiveAction(${a.id})" title="Archivia">📦</button> <button class="btn btn-outline btn-small" style="color:red" onclick="deleteAction(${a.id})">🗑️</button></td></tr>`;
+            const hasInterviews = a.interviewHistory && a.interviewHistory.length > 0;
+            return `<tr class="${hasInterviews ? 'row-interview' : ''}">
+                <td>#${a.id}</td>
+                <td>${a.date}</td>
+                <td><strong>${hasInterviews ? '🤝 ' : ''}${a.company}</strong></td>
+                <td>${a.role}</td>
+                <td class="rating-star">${'★'.repeat(a.rating)}</td>
+                <td>${a.status}</td>
+                <td>${nextFU ? nextFU.date : '-'}</td>
+                <td>
+                    <button class="btn btn-outline btn-small" onclick="editAction(${a.id})">✏️</button>
+                    <button class="btn btn-outline btn-small" onclick="archiveAction(${a.id})">📦</button>
+                    <button class="btn btn-outline btn-small" style="color:red" onclick="deleteAction(${a.id})">🗑️</button>
+                </td>
+            </tr>`;
         }).join('');
     }
-    
+
     function renderArchive() {
-        const filterVal = document.getElementById('archive-status-filter').value;
-        const f = actions.filter(a => filterVal === 'all' ? (a.status === 'Archiviata' || a.status === 'Rigettata') : a.status === filterVal);
-        document.getElementById('archive-list').innerHTML = f.map(a => `<tr><td>#${a.id}</td><td>${a.date}</td><td>${a.company}</td><td>${a.status}</td><td style="font-size:0.75rem" title="${a.notes}">${a.notes || ''}</td><td><button class="btn btn-outline btn-small" onclick="restoreAction(${a.id})" title="Ripristina">🔄</button> <button class="btn btn-outline btn-small" onclick="editAction(${a.id})">✏️</button> <button class="btn btn-outline btn-small" style="color:red" onclick="deleteAction(${a.id})">🗑️</button></td></tr>`).join('');
+        const fV = document.getElementById('archive-status-filter').value;
+        const f = actions.filter(a => fV === 'all' ? (a.status === 'Archiviata' || a.status === 'Rigettata') : a.status === fV);
+        document.getElementById('archive-list').innerHTML = f.map(a => {
+            const hasInterviews = a.interviewHistory && a.interviewHistory.length > 0;
+            return `<tr class="${hasInterviews ? 'row-interview' : ''}">
+                <td>#${a.id}</td>
+                <td>${a.date}</td>
+                <td><strong>${hasInterviews ? '🤝 ' : ''}${a.company}</strong></td>
+                <td>${a.status}</td>
+                <td>${a.notes || ''}</td>
+                <td>
+                    <button class="btn btn-outline btn-small" onclick="restoreAction(${a.id})" title="Ripristina">🔄</button> 
+                    <button class="btn btn-outline btn-small" onclick="editAction(${a.id})">✏️</button> 
+                    <button class="btn btn-outline btn-small" style="color:red" onclick="deleteAction(${a.id})">🗑️</button>
+                </td>
+            </tr>`;
+        }).join('');
     }
     
     function markFUDone(actId, fuId) { const a = actions.find(a => a.id === actId); a.fuHistory.find(f => f.id === fuId).completed = true; save(); renderDashboard(); }
