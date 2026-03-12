@@ -15,12 +15,18 @@
 
         body { font-family: 'Inter', -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
-        /* Navigazione adattata per iPhone: Menu a scorrimento orizzontale */
-        nav { background: var(--card); padding: 15px 15px 10px 15px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-        .nav-brand { font-weight: 800; font-size: 1.2rem; color: var(--primary); margin-bottom: 12px; text-align: center; }
-        .nav-links { display: flex; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; gap: 8px; padding-bottom: 5px; scrollbar-width: none; }
-        .nav-links::-webkit-scrollbar { display: none; }
-        .nav-links button { background: #f8fafc; border: 1px solid var(--border); color: #64748b; font-weight: 600; cursor: pointer; transition: 0.2s; padding: 10px 16px; border-radius: 20px; flex: 0 0 auto; font-size: 0.9rem; }
+        /* Navigazione adattata per iPhone: Hamburger Menu */
+        nav { background: var(--card); padding: 15px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .nav-brand { font-weight: 800; font-size: 1.2rem; color: var(--primary); margin: 0; }
+        
+        /* Pulsante Hamburger */
+        .hamburger-btn { background: none; border: none; font-size: 1.8rem; color: var(--text); cursor: pointer; padding: 0; line-height: 1; display: block; }
+        
+        /* Contenitore Links a comparsa */
+        .nav-links { display: none; width: 100%; flex-direction: column; gap: 8px; padding-top: 15px; }
+        .nav-links.show { display: flex; animation: fadeIn 0.2s ease; }
+        
+        .nav-links button { background: #f8fafc; border: 1px solid var(--border); color: #64748b; font-weight: 600; cursor: pointer; transition: 0.2s; padding: 12px 16px; border-radius: 12px; font-size: 1rem; text-align: left; width: 100%; }
         .nav-links button.active { color: white; background: var(--primary); border-color: var(--primary); }
 
         .container { padding: 15px; margin-bottom: 40px; }
@@ -86,7 +92,8 @@
 
 <nav class="no-print">
     <div class="nav-brand">🎯 CareerOS Pro</div>
-    <div class="nav-links">
+    <button class="hamburger-btn" onclick="toggleMenu()">☰</button>
+    <div class="nav-links" id="nav-links">
         <button onclick="showView('dashboard')" id="btn-dashboard" class="active">Dashboard</button>
         <button onclick="showView('address-book')" id="btn-address-book">Rubrica CRM</button>
         <button onclick="showView('new-action')" id="btn-new-action">+ Nuova Candidatura</button>
@@ -313,11 +320,20 @@
         localStorage.setItem('c_pro_statuses', JSON.stringify(appStatuses));
     }
 
+    // --- NUOVA FUNZIONE PER IL MENU HAMBURGER ---
+    function toggleMenu() {
+        document.getElementById('nav-links').classList.toggle('show');
+    }
+
     function showView(viewId) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
         document.getElementById('view-'+viewId).classList.add('active');
         document.getElementById('btn-'+viewId).classList.add('active');
+        
+        // Chiude il menu dopo aver cliccato una voce
+        document.getElementById('nav-links').classList.remove('show');
+        
         if(viewId === 'dashboard') renderDashboard();
         if(viewId === 'address-book') renderContacts();
         if(viewId === 'new-action') { if(!document.getElementById('act-id').value) resetActionForm(); populateActionSelectors(); }
