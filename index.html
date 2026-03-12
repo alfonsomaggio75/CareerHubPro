@@ -39,17 +39,18 @@
 
         .form-card { background: var(--card); padding: 15px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }
         
-        /* Griglia Form: 1 colonna unica su iPhone */
-        .form-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        .full, .half { grid-column: span 1; }
+        /* FIX: Griglia Form impostata con minmax(0, 1fr) per bloccare l'esplosione dei bordi */
+        .form-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 15px; width: 100%; }
+        /* FIX: min-width: 0 obbliga l'elemento figlio a non sforare la griglia */
+        .full, .half { grid-column: span 1; min-width: 0; }
         
         label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; color: #475569; }
-        /* Font-size 16px obbligatorio su mobile per evitare lo zoom automatico di iOS sui campi di testo. Aggiunto max-width 100% per sicurezza */
-        input, select, textarea { width: 100%; max-width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; box-sizing: border-box; background: #fff; }
-        textarea { min-height: 100px; }
+        
+        /* FIX: Aggiunti overflow e text-overflow in modo che testi o filename troppo lunghi mostrino i "..." e non sforino */
+        input, select, textarea { width: 100%; max-width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; box-sizing: border-box; background: #fff; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+        textarea { min-height: 100px; white-space: normal; overflow: auto; }
         
         .link-container { display: flex; gap: 8px; align-items: center; width: 100%; }
-        /* FIX: Regola per far restringere l'input proporzionalmente senza spingere il bottone fuori dallo schermo */
         .link-container input { flex: 1; min-width: 0; width: auto; }
 
         /* Pulsanti ingranditi per il tocco */
@@ -61,7 +62,7 @@
         .btn-small { padding: 8px 12px; font-size: 0.85rem; border-radius: 6px; }
 
         /* Contenitore tabelle per consentire lo scroll orizzontale senza spaccare l'app */
-        .table-container { background: var(--card); border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; }
+        .table-container { background: var(--card); border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; width: 100%; max-width: 100%; display: block; }
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th { background: #f8fafc; padding: 12px; text-align: left; font-size: 0.75rem; color: #64748b; text-transform: uppercase; border-bottom: 1px solid var(--border); }
         td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.85rem; vertical-align: middle; }
